@@ -17,7 +17,10 @@ function Encode($src, $dst) {
 
 # Publishes the frames swapped in so far: GitHub (which redeploys Pages) and Vercel production.
 function Publish($what) {
-  git add frames blender/watch.py render-hd.ps1 2>&1 | Out-Null
+  # New frame URLs, so browsers drop the year-long cached copies
+  $js = [IO.File]::ReadAllText("$PWD\frames.js") -replace 'FRAME_VERSION = "[^"]*"', "FRAME_VERSION = `"hd$(Get-Date -Format MMddHHmm)`""
+  [IO.File]::WriteAllText("$PWD\frames.js", $js, (New-Object Text.UTF8Encoding $false))
+  git add frames frames.js blender/watch.py render-hd.ps1 2>&1 | Out-Null
   git commit -q -m "perf: native 1920x1200 renders for $what" 2>&1 | Out-Null
   git push -q 2>&1 | Out-Null
   & .\build-dist.ps1 | Out-Null
