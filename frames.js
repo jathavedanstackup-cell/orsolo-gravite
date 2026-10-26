@@ -24,6 +24,7 @@ const LOAD_TIMEOUT_MS = 9000;
 export function createFrames({ reduced, onProgress }) {
   const canvas = document.getElementById("frames");
   const ctx = canvas.getContext("2d");
+  ctx.imageSmoothingQuality = "high"; // frames are upscaled on large or high-DPI screens
   const images = Object.fromEntries(Object.keys(SEQUENCES).map((k) => [k, []]));
   const fit = { scale: 1, ox: 0, oy: 0, iw: 1280, ih: 800 };
   let anchors = null, drawn = "", lastExplode = -1;
@@ -65,6 +66,7 @@ export function createFrames({ reduced, onProgress }) {
     fit.scale = Math.max(canvas.width / fit.iw, canvas.height / fit.ih);
     fit.ox = (canvas.width - fit.iw * fit.scale) / 2;
     fit.oy = (canvas.height - fit.ih * fit.scale) / 2;
+    ctx.imageSmoothingQuality = "high"; // resizing the canvas resets context state
     drawn = "";
   }
 

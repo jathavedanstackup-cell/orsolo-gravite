@@ -23,7 +23,8 @@ FONT_SANS = r"C:\Windows\Fonts\segoeui.ttf"
 AP_X, AP_Y, AP_R = 0.0, -0.62, 0.42
 WIDTH, HEIGHT = 1280, 800  # 16:10 like 1440x900; sized for a CPU-only render budget
 FIT = max(1.0, 1.75 / (WIDTH / HEIGHT))  # same framing rule as main.js
-SAMPLES = 28
+SAMPLES = int(os.environ.get("ORSOLO_SAMPLES", 28))
+SCALE = int(os.environ.get("ORSOLO_SCALE", 100))  # render size in percent, e.g. 150 for 1920x1200
 
 bpy.ops.wm.read_factory_settings(use_empty=True)
 scene = bpy.context.scene
@@ -512,6 +513,7 @@ r = scene.render
 r.engine, r.resolution_x, r.resolution_y, r.film_transparent = "CYCLES", WIDTH, HEIGHT, True
 r.image_settings.file_format, r.image_settings.color_mode = "PNG", "RGBA"
 r.use_persistent_data = True  # keep the BVH between sequence frames
+r.resolution_percentage = SCALE
 c = scene.cycles
 c.device, c.samples, c.use_adaptive_sampling, c.adaptive_threshold = "CPU", SAMPLES, True, 0.03
 c.use_denoising = True

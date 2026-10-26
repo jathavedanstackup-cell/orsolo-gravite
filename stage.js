@@ -30,7 +30,7 @@ function hideGlassDuring(pass, watch) {
 export function createStage(canvas, background) {
   const tier = detectTier();
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: "high-performance" });
-  let dpr = Math.min(devicePixelRatio, tier === "low" ? 1.25 : 1.75);
+  let dpr = Math.min(devicePixelRatio, tier === "low" ? 1.25 : 2);
   renderer.setPixelRatio(dpr);
   // AgX rolls highlights off like film instead of clipping polished steel to flat white; it matches the Cycles renders.
   renderer.toneMapping = THREE.AgXToneMapping;
