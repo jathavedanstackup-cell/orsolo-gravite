@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Orsolo Gravité T1</title>
+  <meta name="description" content="A one-minute flying tourbillon, taken apart by your scroll. A design concept for a fictional Swiss maison.">
+  <meta name="theme-color" content="#0a0e18">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400..600&family=Hanken+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script type="importmap">
+    { "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    } }
+  </script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <div class="loader" id="loader" aria-hidden="true">
+    <p class="loader__brand">Orsolo</p>
+    <div class="loader__line"><span id="loaderBar"></span></div>
+    <p class="loader__progress" id="loaderProgress"></p>
+    <img class="loader__still" src="still.webp" alt="" width="1600" height="1000" fetchpriority="high">
+  </div>
+
+  <canvas class="stage" id="stage" aria-hidden="true"></canvas>
+  <div class="backdrop" aria-hidden="true">
+    <span class="backdrop__word backdrop__word--hero">Gravité</span>
+    <span class="backdrop__word backdrop__word--movement">OR-01</span>
+  </div>
+  <canvas class="frames" id="frames" aria-hidden="true"></canvas>
+  <div class="vignette" aria-hidden="true"></div>
+  <svg class="callout" id="callout" aria-hidden="true"><path d=""/><circle r="4" cx="0" cy="0"/></svg>
+  <svg class="dims" id="dims" aria-hidden="true"></svg>
+  <div class="iris" id="iris" aria-hidden="true"></div>
+  <div class="grip" id="grip" role="slider" tabindex="0" aria-label="Wind the crown"
+       aria-valuemin="0" aria-valuemax="72" aria-valuenow="18" aria-valuetext="18 hours of power reserve">
+    <span class="grip__ring" aria-hidden="true"></span>
+    <span class="grip__hint" aria-hidden="true">Drag to wind</span>
+  </div>
+  <img class="still" src="still.webp" alt="The Gravité T1 on a navy leather strap, silver Glacier dial with the tourbillon at six o'clock" width="1600" height="1000" decoding="async">
+
+  <header class="nav" id="nav">
+    <a class="nav__brand" href="#top" aria-label="Orsolo, back to top">
+      <svg viewBox="0 0 64 64" width="26" height="26" aria-hidden="true">
+        <circle cx="32" cy="32" r="29" fill="none" stroke="currentColor" stroke-width="3"/>
+        <circle cx="32" cy="44" r="9" fill="none" stroke="currentColor" stroke-width="3"/>
+        <path d="M32 10v20" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+      </svg>
+      <span>Orsolo</span>
+    </a>
+    <nav aria-label="Sections">
+      <ul class="nav__links">
+        <li><a href="#movement">Movement</a></li>
+        <li><a href="#tourbillon">Tourbillon</a></li>
+        <li><a href="#hours">Making</a></li>
+        <li><a href="#dial">Dial</a></li>
+      </ul>
+    </nav>
+    <div class="nav__end">
+      <button class="sound" id="soundToggle" type="button" aria-pressed="false">
+        <span class="sound__bars" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span class="sound__label">Sound off</span>
+      </button>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero" id="top">
+      <div class="hero__copy">
+        <h1 class="hero__title" data-split>Time, held against gravity.</h1>
+        <p class="hero__lede reveal">Gravité T1. A one-minute flying tourbillon, assembled by one watchmaker.</p>
+      </div>
+    </section>
+
+    <section class="explode" id="movement" aria-label="The movement, layer by layer">
+      <div class="explode__sticky">
+        <ol class="rail" id="rail" aria-label="Parts of the movement">
+          <li><button type="button" data-i="0">Sapphire</button></li>
+          <li><button type="button" data-i="1">Hands</button></li>
+          <li><button type="button" data-i="2">Dial</button></li>
+          <li><button type="button" data-i="3">Bridges</button></li>
+          <li><button type="button" data-i="4">Gear train</button></li>
+          <li><button type="button" data-i="5">Barrel</button></li>
+          <li><button type="button" data-i="6">Case</button></li>
+        </ol>
+        <div class="parts" id="parts">
+          <article class="part" data-i="0">
+            <h2>Sapphire, both sides</h2>
+            <p>A domed crystal with anti-reflective coating on the inside face only, so the dial reads as if nothing sits above it.</p>
+          </article>
+          <article class="part" data-i="1">
+            <h2>Hands, blued by flame</h2>
+            <p>Steel heated over an open flame until it turns this exact blue at around 290&nbsp;°C. The colour is the finish and the protection.</p>
+          </article>
+          <article class="part" data-i="2">
+            <h2>A dial with a window</h2>
+            <p>Grand feu enamel, fired eleven times. The opening at six o'clock exists for one reason: to show the cage turning.</p>
+          </article>
+          <article class="part" data-i="3">
+            <h2>Bridges, bevelled by hand</h2>
+            <p>Every edge is filed to a 45° angle and polished until it throws a single line of light. Including the edges no one will see.</p>
+          </article>
+          <article class="part" data-i="4">
+            <h2>The gear train</h2>
+            <p>Four wheels carry energy from barrel to escapement. Their teeth are cut, then polished one flank at a time.</p>
+          </article>
+          <article class="part" data-i="5">
+            <h2>Seventy-two hours</h2>
+            <p>A single barrel holds three days of power. Wind it on Friday evening and it is still running on Monday.</p>
+          </article>
+          <article class="part" data-i="6">
+            <h2>A case in grade 5 titanium</h2>
+            <p>Forty-one millimetres, eleven point four thick, with an open caseback so the movement keeps working in plain view.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="tourbillon" id="tourbillon">
+      <div class="tourbillon__sticky">
+        <h2 class="tourbillon__title" data-split>It turns once a minute, so gravity never settles.</h2>
+        <div class="tourbillon__read">
+          <p>A still balance drifts as gravity pulls on it. In 1801 Breguet set the whole escapement turning, so the error averages out.</p>
+          <p class="tourbillon__count"><span id="cageDeg">0</span>° <span class="muted">through this rotation, live</span></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="hours" id="hours" aria-label="Three hundred and forty hours of making">
+      <div class="hours__sticky">
+        <h2 class="hours__title">340 hours, one pair of hands.</h2>
+        <div class="hours__track" id="hoursTrack">
+          <article class="hour"><p class="hour__n">62<span>h</span></p><h3>Cutting the bridges</h3><p>Plates are milled from German silver, then left to rest a week so the metal settles before it is touched again.</p></article>
+          <article class="hour"><p class="hour__n">118<span>h</span></p><h3>Bevelling and graining</h3><p>The longest step. Files, then wood sticks with diamond paste, then gentian wood for the final shine.</p></article>
+          <article class="hour"><p class="hour__n">41<span>h</span></p><h3>Black polish</h3><p>Steel parts are rubbed flat on tin until they look black from one angle and white from another.</p></article>
+          <article class="hour"><p class="hour__n">87<span>h</span></p><h3>Assembly</h3><p>Two hundred and nine parts, fitted under a loupe. Anything that marks is taken back and refinished.</p></article>
+          <article class="hour"><p class="hour__n">32<span>h</span></p><h3>Regulation</h3><p>Tested in six positions and three temperatures until the rate holds within two seconds a day.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="specs" id="specs" aria-labelledby="specsTitle">
+      <div class="specs__sticky">
+        <h2 id="specsTitle" class="specs__title">Drawn to forty-one millimetres.</h2>
+        <dl class="specs__figures">
+          <div><dt>One turn of the tourbillon cage</dt><dd>60<span>s</span></dd></div>
+          <div><dt>Power reserve, single barrel</dt><dd>72<span>h</span></dd></div>
+          <div><dt>Vibrations per hour, 3&nbsp;Hz</dt><dd>21,600</dd></div>
+        </dl>
+        <dl class="specs__list">
+          <div><dt>Calibre</dt><dd>OR-01, hand-wound</dd></div>
+          <div><dt>Jewels</dt><dd>23 rubies</dd></div>
+          <div><dt>Case</dt><dd>Grade 5 titanium</dd></div>
+          <div><dt>Water</dt><dd>50 m</dd></div>
+          <div><dt>Edition</dt><dd>18 a year</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <section class="wind" id="wind" aria-labelledby="windTitle">
+      <div class="wind__copy">
+        <h2 id="windTitle">Wind it yourself.</h2>
+        <p>Drag the crown, or use the arrow keys. The balance swings wider as the mainspring tightens.</p>
+        <p class="wind__reserve"><span id="reserveValue">18</span><span class="wind__unit">h</span> <span class="wind__label">power reserve, of 72</span></p>
+      </div>
+    </section>
+
+    <section class="dial" id="dial" aria-labelledby="dialTitle">
+      <div class="dial__copy">
+        <h2 id="dialTitle">Choose the dial.</h2>
+        <p>Three grand feu enamels, fired in the same kiln. Turn the lights out to see the lume.</p>
+        <div class="swatches" role="radiogroup" aria-label="Dial colour" id="swatches">
+          <button type="button" role="radio" aria-checked="true" data-dial="glacier" style="--sw:#d5dbe3"><span class="swatch__chip"></span><span>Glacier</span></button>
+          <button type="button" role="radio" aria-checked="false" data-dial="nuit" style="--sw:#1d3274"><span class="swatch__chip"></span><span>Nuit</span></button>
+          <button type="button" role="radio" aria-checked="false" data-dial="saumon" style="--sw:#d79a80"><span class="swatch__chip"></span><span>Saumon</span></button>
+        </div>
+        <button class="lights" id="lightsToggle" type="button" aria-pressed="false">Lights out</button>
+      </div>
+    </section>
+
+    <section class="finale" id="finale" aria-labelledby="finaleTitle">
+      <h2 id="finaleTitle">Eighteen a year.</h2>
+      <p>Each one wound, regulated and signed off by the hands that built it.</p>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <p>Orsolo and the Gravité T1 are fictional. A design and engineering study.</p>
+    <p class="foot__fallback" id="glFallback" hidden>3D could not start in this browser, so you are seeing a still render of the watch. Everything else works.</p>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
+  <script type="module" src="main.js"></script>
+</body>
+</html>

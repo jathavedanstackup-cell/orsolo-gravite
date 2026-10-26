@@ -1,0 +1,13 @@
+# Render masters and review stills: the site ships webp only
+*.png
+review-*.webp
+
+# Build output and local tooling
+orsolo-gravite/
+.vercel/
+.claude/
+ref/
+
+# Dev-only pages
+capture.html
+blender/view.html
