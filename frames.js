@@ -20,7 +20,7 @@ const PATH_SCENES = { reassemble: "tourbillon", approach: "tourbillon", hold: "t
 const OUT_FADE = 0.05; // share of the movement chapter used to hand back to live WebGL
 const MIN_ASPECT = 1.25; // renders are 16:10; portrait screens keep the live scene
 const LOAD_TIMEOUT_MS = 9000;
-export const FRAME_VERSION = "hd1"; // frames are cached for a year; bump this whenever they are re-rendered
+export const FRAME_VERSION = "hd10271159"; // frames are cached for a year; bump this whenever they are re-rendered
 
 export function createFrames({ reduced, onProgress }) {
   const canvas = document.getElementById("frames");
