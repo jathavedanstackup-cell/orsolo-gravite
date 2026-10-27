@@ -38,8 +38,6 @@ const ticker = createTicker();
 const winding = createWinding({ ticker });
 const film = createIntro({ reduced });
 const renders = createFrames({ reduced, onProgress: (f) => film.progress(f) });
-// Where the dial sits in the opening render (0..1 of the frame), so the title camera flies through an O into it.
-const OPENING_DIAL = [0.66, 0.43];
 const introPlay = { t: 0 };
 const ui = initUi({
   lenis, reduced,
@@ -229,6 +227,8 @@ function placeCamera() {
 }
 
 function tick(_, deltaMs) {
+  // While the title sequence fully covers the page, its own WebGL scene has the GPU to itself.
+  if (film.opaque) return;
   const dt = Math.min(0.05, (deltaMs || 16) / 1000);
   const { caption, inMovement, specs, movement } = ui.update();
   // Path-traced frames cover the live scene from the hero through the movement chapter (desktop only).
@@ -297,7 +297,6 @@ document.fonts.ready.then(() => {
   // The title sequence plays first. As it opens onto the page, desktop starts the path-traced opening;
   // phones and reduced motion open on the live scene's dive.
   Promise.all([renders.load(), film.load()]).then(([rendered]) => film.play({
-    target: () => renders.screenPoint(...OPENING_DIAL) || { x: innerWidth * 0.5, y: innerHeight * 0.45 },
     onSound: () => { const toggle = $("#soundToggle"); if (toggle.getAttribute("aria-pressed") !== "true") toggle.click(); },
     onReveal: () => {
       lenis?.start();

@@ -138,13 +138,6 @@ export function createFrames({ reduced, onProgress }) {
       return cover;
     },
 
-    // Screen position (CSS px) of a point in the render, given as 0..1 of its width and height.
-    screenPoint(u, v) {
-      if (!enabled()) return null;
-      const dpr = canvas.width / innerWidth;
-      return { x: (fit.ox + u * fit.iw * fit.scale) / dpr, y: (fit.oy + v * fit.ih * fit.scale) / dpr };
-    },
-
     // Screen position (CSS px) of a caption's part in the current exploded frame, from Blender's projection.
     anchor(caption) {
       if (!anchors || lastExplode < 0) return null;
