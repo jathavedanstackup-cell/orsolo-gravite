@@ -20,6 +20,9 @@ const PATH_SCENES = { reassemble: "tourbillon", approach: "tourbillon", hold: "t
 const OUT_FADE = 0.05; // share of the movement chapter used to hand back to live WebGL
 const MIN_ASPECT = 1.25; // renders are 16:10; portrait screens keep the live scene
 const LOAD_TIMEOUT_MS = 9000;
+// The watch case in the hero pose (last intro frame): centre and half-extents, in 0..1 of the frame.
+// Measured from the outer bezel, crown excluded. The title sequence lands its O exactly here.
+const HERO_CASE = { centre: [0.648, 0.492], half: [0.1745, 0.2917] };
 export const FRAME_VERSION = "hd10271159"; // frames are cached for a year; bump this whenever they are re-rendered
 
 export function createFrames({ reduced, onProgress }) {
@@ -136,6 +139,15 @@ export function createFrames({ reduced, onProgress }) {
       canvas.style.opacity = cover.toFixed(3);
       document.documentElement.dataset.scene = cover > 0.5 ? scene : "";
       return cover;
+    },
+
+    // The hero watch case on screen, in CSS px, or null when the renders are not in use.
+    heroCase() {
+      if (!enabled()) return null;
+      const dpr = canvas.width / innerWidth;
+      const w = (fit.iw * fit.scale) / dpr, h = (fit.ih * fit.scale) / dpr;
+      const x = fit.ox / dpr + HERO_CASE.centre[0] * w, y = fit.oy / dpr + HERO_CASE.centre[1] * h;
+      return { x, y, rx: HERO_CASE.half[0] * w, ry: HERO_CASE.half[1] * h };
     },
 
     // Screen position (CSS px) of a caption's part in the current exploded frame, from Blender's projection.

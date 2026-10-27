@@ -24,7 +24,7 @@ html.is-intro, html.is-intro body { overflow: hidden; }
   font-family: var(--font-body); font-size: var(--text-small); letter-spacing: 0.04em; color: var(--studio-mute);
 }
 
-/* Gate: loading, then the choice that unlocks sound. Same ivory as the studio, so Enter cuts straight in. */
+/* Loading card, same ivory as the studio, so it dissolves straight into the film. */
 .intro__gate {
   position: absolute; inset: 0; z-index: 3;
   display: grid; place-content: center; justify-items: center; gap: 1.25rem;
@@ -35,24 +35,14 @@ html.is-intro, html.is-intro body { overflow: hidden; }
 .intro__line { width: min(14rem, 60vw); height: 1px; background: rgb(21 23 28 / 0.14); overflow: hidden; }
 .intro__line span { display: block; height: 100%; background: var(--studio-ink); transform: scaleX(0); transform-origin: left; transition: transform 0.4s var(--ease-out); }
 .intro__progress { margin: 0; min-height: 1.2em; font-size: 0.8125rem; color: var(--studio-mute); font-variant-numeric: tabular-nums; }
-.intro__enter { display: grid; justify-items: center; gap: 0.75rem; margin-top: 0.5rem; }
-.intro__enter[hidden] { display: none; }
-.intro__go {
-  min-height: 48px; padding: 0 1.6rem; border-radius: 999px; cursor: pointer; border: 0;
-  font: 500 0.9375rem var(--font-body); letter-spacing: 0.01em;
-  color: var(--studio); background: var(--studio-ink);
-  transition: background 0.25s var(--ease-out), transform 0.25s var(--ease-out);
-}
-.intro__go:hover { background: #000; }
-.intro__go:active { transform: scale(0.97); }
-.intro__quiet, .intro__skip {
+.intro__skip {
   min-height: 44px; padding: 0 0.75rem; cursor: pointer; border: 0; background: none;
   font: 400 0.875rem var(--font-body); color: var(--studio-mute);
   text-decoration: underline; text-decoration-color: rgb(21 23 28 / 0.2); text-underline-offset: 0.3em;
   transition: color 0.25s var(--ease-out), text-decoration-color 0.25s var(--ease-out);
 }
-.intro__quiet:hover, .intro__skip:hover { color: var(--studio-ink); text-decoration-color: var(--studio-ink); }
-.intro__go:focus-visible, .intro__quiet:focus-visible, .intro__skip:focus-visible { outline: 2px solid var(--blue-deep); outline-offset: 4px; }
+.intro__skip:hover { color: var(--studio-ink); text-decoration-color: var(--studio-ink); }
+.intro__skip:focus-visible { outline: 2px solid var(--blue-deep); outline-offset: 4px; }
 .intro__skip { position: absolute; z-index: 2; right: var(--gutter); bottom: clamp(1rem, 3dvh, 2rem); }
 .intro__skip[hidden] { display: none; }
 

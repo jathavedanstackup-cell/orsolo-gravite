@@ -5,7 +5,6 @@
 import * as THREE from "three";
 import { SVGLoader } from "three/addons/loaders/SVGLoader.js";
 import { GLYPHS, CAP_HEIGHT } from "./glyphs.js";
-import { createScore } from "./score.js";
 
 const WORD = "ORSOLO";
 const PORTAL = 3; // the middle O
@@ -14,7 +13,7 @@ const IVORY = 0xf1ece3;
 const DPR_CAP = 1.75;
 const FOV = 30;
 const EXTRUDE = { depth: 0.16, bevelEnabled: true, bevelThickness: 0.014, bevelSize: 0.009, bevelSegments: 4, curveSegments: 18 };
-const T = { drop: 0.35, dropGap: 0.2, spin: 1.9, lock: 5.0, reveal: 5.25, dive: 5.95, diveLen: 1.15 };
+const T = { drop: 0.35, dropGap: 0.2, spin: 1.9, lock: 5.0, reveal: 5.25, dive: 5.95, diveLen: 1.15, match: 5.95, matchLen: 1.25, iris: 1.0 };
 
 const smooth = (t) => t * t * (3 - 2 * t);
 
@@ -48,9 +47,8 @@ export function createIntro({ reduced }) {
   const root = document.getElementById("intro");
   const canvas = document.getElementById("introFilm");
   const $ = (s) => root.querySelector(s);
-  const score = createScore();
-  const st = { orbit: 0, lift: 1, close: 0, dive: 0, portal: 0, spin: 0, lock: 0 };
-  let three = null, timeline = null, soundOn = false, started = false;
+  const st = { orbit: 0, lift: 1, close: 0, dive: 0, portal: 0, spin: 0, lock: 0, match: 0, others: 0, melt: 0, iris: 0 };
+  let three = null, timeline = null, started = false, targetFn = null, matchTo = null;
 
   document.documentElement.classList.add("is-intro");
   const inertables = ["#nav", "#main", ".foot"].map((s) => document.querySelector(s)).filter(Boolean);
@@ -114,6 +112,12 @@ export function createIntro({ reduced }) {
     const portalMat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0, blending: THREE.NoBlending, depthWrite: false });
     const portal = new THREE.Mesh(portalGeo, portalMat);
     const oMesh = letters[PORTAL].pivot.children[0];
+    // The O keeps its own materials, so the other letters can fade out around it during the match cut.
+    const oChrome = chrome.clone(), oGold = gold.clone();
+    oMesh.material = [oChrome, oGold];
+    [chrome, gold, oChrome, oGold].forEach((m) => { m.transparent = true; });
+    const oBox = oMesh.geometry.boundingBox;
+    const oHalf = new THREE.Vector2((oBox.max.x - oBox.min.x) / 2, (oBox.max.y - oBox.min.y) / 2);
     // Same y-down space and centring as the O itself: reuse the extrude's offset.
     const oShapeGeo = new THREE.ExtrudeGeometry(letters[PORTAL].shapes, EXTRUDE);
     oShapeGeo.computeBoundingBox();
@@ -144,7 +148,7 @@ export function createIntro({ reduced }) {
     scene.add(key, new THREE.HemisphereLight(0xffffff, 0xe9dfcf, 0.9));
 
     const camera = new THREE.PerspectiveCamera(FOV, 1, 0.004, 60);
-    return { renderer, scene, camera, word, letters, portal, width, floorY, chrome, gold };
+    return { renderer, scene, camera, word, letters, portal, width, floorY, floor, chrome, gold, oChrome, oGold, oHalf };
   }
 
   // Distance at which the word fills the given share of the frame width.
@@ -156,6 +160,7 @@ export function createIntro({ reduced }) {
 
   function resize() {
     if (!three) return;
+    if (matchTo) matchTo = targetFn?.() || matchTo;
     three.renderer.setSize(innerWidth, innerHeight, false);
     three.camera.aspect = innerWidth / innerHeight;
     three.camera.updateProjectionMatrix();
@@ -200,6 +205,32 @@ export function createIntro({ reduced }) {
     camera.fov = FOV + d * 14;
     camera.updateProjectionMatrix();
     const look = focus.clone().lerp(into, smooth(st.close));
+    // Match cut: square on, at the distance and offset that lay the O's outer edge over the watch case
+    // on the page, stretched to the case's proportion. The studio then dissolves around it.
+    if (st.match > 0 && matchTo) {
+      const tanHalf = Math.tan(THREE.MathUtils.degToRad(FOV / 2));
+      const dz = three.oHalf.y * (innerHeight / 2) / (matchTo.ry * tanHalf);
+      const offX = ((matchTo.x - innerWidth / 2) / (innerWidth / 2)) * dz * tanHalf * camera.aspect;
+      const offY = (-(matchTo.y - innerHeight / 2) / (innerHeight / 2)) * dz * tanHalf;
+      camera.position.lerp(new THREE.Vector3(into.x - offX, into.y - offY, into.z + dz), st.match);
+      look.lerp(new THREE.Vector3(into.x - offX, into.y - offY, into.z), st.match);
+      const stretch = (matchTo.rx / matchTo.ry) / (three.oHalf.x / three.oHalf.y);
+      letters[PORTAL].pivot.scale.x = 1 + (stretch - 1) * st.match;
+    }
+    // The other letters and their shadows fall away; the O then melts into the real case beneath it.
+    three.chrome.opacity = three.gold.opacity = 1 - st.others;
+    three.floor.material.opacity = 0.16 * (1 - st.others);
+    three.oChrome.opacity = three.oGold.opacity = 1 - st.melt;
+    // The studio irises outward from the watch: first to just past the case (hidden under the O),
+    // so the real case is already there when the O melts, then out to the corners.
+    if (st.iris > 0 && matchTo) {
+      const r0 = Math.min(matchTo.rx, matchTo.ry) * 0.6, rCase = Math.max(matchTo.rx, matchTo.ry) * 1.1;
+      const r1 = Math.hypot(innerWidth, innerHeight) * 1.1;
+      const r = st.iris <= 0.25 ? r0 + (rCase - r0) * (st.iris / 0.25) : rCase + (r1 - rCase) * ((st.iris - 0.25) / 0.75);
+      const soft = 24 + r * 0.22;
+      const mask = `radial-gradient(circle at ${matchTo.x}px ${matchTo.y}px, transparent ${r}px, #000 ${r + soft}px)`;
+      canvas.style.webkitMaskImage = canvas.style.maskImage = mask;
+    }
     camera.lookAt(look);
 
     portal.scale.setScalar(Math.max(0.0001, st.portal));
@@ -210,25 +241,37 @@ export function createIntro({ reduced }) {
   function sequence(onReveal) {
     const { letters } = three;
     const tl = gsap.timeline({ paused: true, onUpdate: render });
-    tl.call(() => score.drone(true), null, 0.05);
     // Each letter drops and lands on the tick, with a small rebound off the floor.
     letters.forEach((l, i) => {
       const at = T.drop + i * T.dropGap;
       l.drop = 0;
       tl.to(l, { drop: 1, duration: 0.55, ease: "power3.in" }, at);
-      tl.call(() => score.tick(i % 2 === 1), null, at + 0.55);
       tl.fromTo(l, { bounce: 0 }, { keyframes: [{ bounce: 0.06, duration: 0.12, ease: "power2.out" }, { bounce: 0, duration: 0.2, ease: "power2.in" }], immediateRender: false }, at + 0.55);
     });
     // The O's spin up and wind down to rest square on, two full turns, while the camera orbits.
     tl.to(st, { orbit: 1, duration: T.lock - 0.6, ease: "none" }, 0.6);
     tl.to(st, { spin: 2, duration: T.lock - T.spin, ease: "power2.inOut" }, T.spin);
-    tl.call(() => score.boom(), null, T.lock);
     tl.to(st, { close: 1, duration: 1.1, ease: "expo.inOut" }, T.lock - 0.3);
     tl.fromTo("#introSub", { opacity: 0, y: 12, filter: "blur(6px)" }, { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.8, ease: "expo.out" }, T.lock + 0.1);
-    // Night opens inside the ring: the page begins its own opening behind it.
+    if (matchTo) {
+      // Desktop: the O travels onto the watch case, its counter opens onto the real dial,
+      // the other letters fall away, and the studio dissolves into the page.
+      tl.to("#introSub", { opacity: 0, y: -8, duration: 0.3, ease: "power2.in" }, T.match - 0.3);
+      tl.call(() => onReveal(), null, T.match - 0.15);
+      tl.to(st, { others: 1, duration: 0.55, ease: "power2.in" }, T.match);
+      tl.to(st, { match: 1, duration: T.matchLen, ease: "expo.inOut" }, T.match);
+      tl.to(st, { portal: 1, duration: 0.9, ease: "expo.out" }, T.match + 0.25);
+      tl.to("#introSkip", { opacity: 0, duration: 0.3 }, T.match);
+      const landed = T.match + T.matchLen - 0.05;
+      tl.to(st, { iris: 0.25, duration: 0.3, ease: "power2.out" }, landed);
+      tl.to(st, { melt: 1, duration: 0.45, ease: "power2.inOut" }, landed + 0.25);
+      tl.to(st, { iris: 1, duration: T.iris, ease: "power2.in" }, landed + 0.5);
+      tl.call(finish, null, landed + 0.5 + T.iris);
+      return tl;
+    }
+    // Phones: night opens inside the ring, and the camera dives through it into the page.
     tl.call(() => onReveal(), null, T.reveal - 0.15);
     tl.to(st, { portal: 1, duration: 0.7, ease: "expo.out" }, T.reveal);
-    tl.call(() => score.rise(), null, T.dive - 0.45);
     tl.to("#introSub", { opacity: 0, y: -8, duration: 0.3, ease: "power2.in" }, T.dive - 0.25);
     tl.to(st, { dive: 1, duration: T.diveLen, ease: "none" }, T.dive);
     tl.to("#introSkip", { opacity: 0, duration: 0.3 }, T.dive);
@@ -238,7 +281,6 @@ export function createIntro({ reduced }) {
 
   function finish() {
     if (root.hidden) return;
-    score.drone(false);
     timeline?.kill();
     gsap.ticker.remove(render);
     removeEventListener("keydown", onKey);
@@ -249,7 +291,7 @@ export function createIntro({ reduced }) {
     // Free the second WebGL context: the page keeps its own.
     if (three) {
       three.scene.traverse((o) => { o.geometry?.dispose(); });
-      three.chrome.dispose(); three.gold.dispose();
+      [three.chrome, three.gold, three.oChrome, three.oGold].forEach((m) => m.dispose());
       three.scene.environment?.dispose();
       three.renderer.dispose();
       three.renderer.forceContextLoss();
@@ -280,7 +322,9 @@ export function createIntro({ reduced }) {
     },
 
     // Shows the gate, then plays. onReveal fires as the page should begin its own opening.
-    play({ onReveal, onSound }) {
+    // target() gives the hero watch case on screen (CSS px) for the match cut, or null to dive instead.
+    play({ onReveal, target }) {
+      targetFn = target;
       try {
         if (!reduced) { three = build(); resize(); render(); }
       } catch (err) {
@@ -293,23 +337,16 @@ export function createIntro({ reduced }) {
       }
       addEventListener("resize", resize);
       showProgress(1);
-      const gate = $(".intro__gate"), enter = $(".intro__enter");
-      enter.hidden = false;
-      gsap.from(enter.children, { opacity: 0, y: 10, duration: 0.8, stagger: 0.08, ease: "expo.out" });
-      enter.querySelector("button").focus({ preventScroll: true });
-      enter.addEventListener("click", (e) => {
-        const button = e.target.closest("button");
-        if (!button || started) return;
-        started = true;
-        soundOn = button.dataset.sound === "on";
-        if (soundOn) score.start();
-        timeline = sequence(() => { onReveal(); if (soundOn) onSound(); });
-        gsap.to(gate, { opacity: 0, duration: 0.6, ease: "power2.out", onComplete: () => { gate.hidden = true; } });
-        $("#introSkip").hidden = false;
-        gsap.from("#introSkip", { opacity: 0, duration: 0.8, delay: 0.8 });
-        addEventListener("keydown", onKey);
-        timeline.play(0);
-      });
+      // No gate choice: once loaded, the loading card fades straight into the film.
+      const gate = $(".intro__gate");
+      started = true;
+      matchTo = targetFn?.() || null;
+      timeline = sequence(onReveal);
+      gsap.to(gate, { opacity: 0, duration: 0.6, delay: 0.25, ease: "power2.out", onComplete: () => { gate.hidden = true; } });
+      $("#introSkip").hidden = false;
+      gsap.from("#introSkip", { opacity: 0, duration: 0.8, delay: 1 });
+      addEventListener("keydown", onKey);
+      gsap.delayedCall(0.25, () => timeline.play(0));
       $("#introSkip").addEventListener("click", skip);
     },
   };

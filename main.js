@@ -297,13 +297,14 @@ document.fonts.ready.then(() => {
   // The title sequence plays first. As it opens onto the page, desktop starts the path-traced opening;
   // phones and reduced motion open on the live scene's dive.
   Promise.all([renders.load(), film.load()]).then(([rendered]) => film.play({
-    onSound: () => { const toggle = $("#soundToggle"); if (toggle.getAttribute("aria-pressed") !== "true") toggle.click(); },
+    // With the renders, the title's O lands on the hero watch case; otherwise it dives through instead.
+    target: () => (rendered ? renders.heroCase() : null),
     onReveal: () => {
       lenis?.start();
       ui.intro(gl ? canvas : null);
       if (rendered) {
         intro.v = 0;
-        gsap.to(introPlay, { t: 1, duration: 3.8, ease: "power1.inOut", delay: 0.05 });
+        introPlay.t = 1; // hold the hero pose, so the case sits exactly where the title's O lands
       } else if (!reduced && gl) {
         gsap.to(intro, { v: 0, duration: 3.6, ease: "expo.inOut", delay: 0.1 });
       }
