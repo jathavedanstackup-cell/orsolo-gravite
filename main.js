@@ -5,6 +5,7 @@ import { createFrames } from "./frames.js";
 import { createDust, createLamp, createIris, createTicker } from "./fx.js";
 import { createWinding } from "./wind.js";
 import { initUi } from "./ui.js";
+import { createIntro } from "./intro.js";
 
 const { gsap, ScrollTrigger } = window;
 gsap.registerPlugin(ScrollTrigger);
@@ -35,14 +36,10 @@ const flash = { v: 0 }, night = { v: 0 };
 const drawIris = createIris();
 const ticker = createTicker();
 const winding = createWinding({ ticker });
-const loaderProgress = $("#loaderProgress"), loaderBar = $("#loaderBar");
-const renders = createFrames({
-  reduced,
-  onProgress: (f) => {
-    loaderProgress.textContent = `${Math.round(f * 100)}`;
-    loaderBar.style.transform = `scaleX(${f})`;
-  },
-});
+const film = createIntro({ reduced });
+const renders = createFrames({ reduced, onProgress: (f) => film.progress(f) });
+// Where the dial sits in the opening render (0..1 of the frame), so the title camera flies through an O into it.
+const OPENING_DIAL = [0.66, 0.43];
 const introPlay = { t: 0 };
 const ui = initUi({
   lenis, reduced,
@@ -296,14 +293,21 @@ document.fonts.ready.then(() => {
   initStage();
   resize();
   gsap.ticker.add(tick);
-  // Desktop opens on the path-traced intro; phones and reduced motion open on the live scene's dive.
-  renders.load().then((rendered) => {
-    ui.intro(gl ? canvas : null);
-    if (rendered) {
-      intro.v = 0;
-      gsap.to(introPlay, { t: 1, duration: 3.8, ease: "power1.inOut", delay: 0.15 });
-    } else if (!reduced && gl) {
-      gsap.to(intro, { v: 0, duration: 3.6, ease: "expo.inOut", delay: 0.1 });
-    }
-  });
+  lenis?.stop();
+  // The title sequence plays first. As it opens onto the page, desktop starts the path-traced opening;
+  // phones and reduced motion open on the live scene's dive.
+  Promise.all([renders.load(), film.load()]).then(([rendered]) => film.play({
+    target: () => renders.screenPoint(...OPENING_DIAL) || { x: innerWidth * 0.5, y: innerHeight * 0.45 },
+    onSound: () => { const toggle = $("#soundToggle"); if (toggle.getAttribute("aria-pressed") !== "true") toggle.click(); },
+    onReveal: () => {
+      lenis?.start();
+      ui.intro(gl ? canvas : null);
+      if (rendered) {
+        intro.v = 0;
+        gsap.to(introPlay, { t: 1, duration: 3.8, ease: "power1.inOut", delay: 0.05 });
+      } else if (!reduced && gl) {
+        gsap.to(intro, { v: 0, duration: 3.6, ease: "expo.inOut", delay: 0.1 });
+      }
+    },
+  }));
 });

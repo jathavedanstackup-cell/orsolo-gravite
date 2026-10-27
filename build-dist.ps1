@@ -5,7 +5,7 @@ $out = "orsolo-gravite"  # the folder name becomes the Vercel project name
 if (Test-Path $out) { Remove-Item $out -Recurse -Force }
 New-Item -ItemType Directory $out | Out-Null
 
-Copy-Item index.html, styles.css, still.webp -Destination $out
+Copy-Item index.html, styles.css, intro.css, still.webp -Destination $out
 Get-ChildItem *.js | Copy-Item -Destination $out
 
 New-Item -ItemType Directory $out\frames | Out-Null

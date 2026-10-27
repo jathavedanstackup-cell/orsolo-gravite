@@ -1,0 +1,91 @@
+/* Title sequence (intro.js). Sits above the page until the camera flies through the O. */
+html.is-intro, html.is-intro body { overflow: hidden; }
+
+.intro {
+  --bar: clamp(2.5rem, calc((100dvh - 100vw / 2.39) / 2), 16dvh);
+  position: fixed; inset: 0; z-index: var(--z-intro);
+  color: var(--rhodium);
+}
+.intro[hidden] { display: none; }
+.intro__film { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+/* Lens falloff over the film only; the page beneath stays untouched once the counter opens. */
+.intro::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(120% 90% at 50% 50%, transparent 55%, rgb(0 0 0 / 0.55) 100%);
+}
+
+/* Letterbox, 2.39:1. Bars carry the timecode and the film's own titles, like a projection gate. */
+.intro__bar {
+  position: absolute; left: 0; right: 0; height: var(--bar); z-index: 2;
+  display: flex; align-items: center; padding: 0 var(--gutter);
+  background: #000;
+}
+.intro__bar--top { top: 0; justify-content: flex-end; }
+.intro__bar--bottom { bottom: 0; justify-content: space-between; gap: 1rem; }
+.intro__tc {
+  font-size: 0.75rem; letter-spacing: 0.08em; color: var(--mist);
+  font-variant-numeric: tabular-nums;
+}
+.intro__super {
+  margin: 0; font-family: var(--font-display); font-style: italic;
+  font-size: clamp(1rem, 0.85rem + 0.6vw, 1.375rem); color: var(--rhodium);
+  min-height: 1.4em;
+}
+
+/* Anamorphic flare across the word's centre line. */
+.intro__streak {
+  position: absolute; left: -10%; right: -10%; top: 50%; height: 2px; margin-top: -1px; z-index: 1;
+  pointer-events: none; opacity: 0; transform-origin: 50% 50%;
+  background: linear-gradient(90deg, transparent, rgb(123 152 242 / 0.5) 30%, #f6f8ff 50%, rgb(123 152 242 / 0.5) 70%, transparent);
+  box-shadow: 0 0 18px 2px rgb(123 152 242 / 0.55), 0 0 60px 6px rgb(42 75 176 / 0.4);
+  filter: blur(0.4px);
+}
+
+/* Model name, set beneath the word after the boom. */
+.intro__sub {
+  position: absolute; left: 0; right: 0; z-index: 1; top: calc(50% + min(11vw, 21dvh));
+  margin: 0; text-align: center; opacity: 0;
+  font-family: var(--font-display); font-size: clamp(1.25rem, 0.9rem + 1.4vw, 2.25rem); color: var(--rhodium);
+}
+.intro__sub em { font-style: italic; }
+.intro__sub span {
+  display: block; margin-top: 0.6rem;
+  font-family: var(--font-body); font-size: var(--text-small); letter-spacing: 0.04em; color: var(--mist);
+}
+
+/* Gate: loading, then the choice that unlocks sound. */
+.intro__gate {
+  position: absolute; inset: 0; z-index: 3;
+  display: grid; place-content: center; justify-items: center; gap: 1.25rem;
+  background: #000;
+}
+.intro__gate[hidden] { display: none; }
+.intro__brand { margin: 0; font-family: var(--font-display); font-size: 1.75rem; letter-spacing: 0.01em; }
+.intro__line { width: min(14rem, 60vw); height: 1px; background: var(--line); overflow: hidden; }
+.intro__line span { display: block; height: 100%; background: var(--rhodium); transform: scaleX(0); transform-origin: left; transition: transform 0.4s var(--ease-out); }
+.intro__progress { margin: 0; min-height: 1.2em; font-size: 0.8125rem; color: var(--mist); font-variant-numeric: tabular-nums; }
+.intro__enter { display: grid; justify-items: center; gap: 0.75rem; margin-top: 0.5rem; }
+.intro__enter[hidden] { display: none; }
+.intro__go {
+  min-height: 48px; padding: 0 1.6rem; border-radius: 999px; cursor: pointer;
+  font: 500 0.9375rem var(--font-body); letter-spacing: 0.01em;
+  color: var(--ink); background: var(--rhodium); border: 0;
+  transition: background 0.25s var(--ease-out), transform 0.25s var(--ease-out);
+}
+.intro__go:hover { background: #fff; }
+.intro__go:active { transform: scale(0.97); }
+.intro__quiet, .intro__skip {
+  min-height: 44px; padding: 0 0.75rem; cursor: pointer; border: 0; background: none;
+  font: 400 0.875rem var(--font-body); color: var(--mist);
+  text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: 0.3em;
+  transition: color 0.25s var(--ease-out), text-decoration-color 0.25s var(--ease-out);
+}
+.intro__quiet:hover, .intro__skip:hover { color: var(--rhodium); text-decoration-color: var(--blue); }
+.intro__go:focus-visible, .intro__quiet:focus-visible, .intro__skip:focus-visible { outline: 2px solid var(--blue); outline-offset: 4px; }
+.intro__skip { position: relative; z-index: 3; }
+.intro__skip[hidden] { display: none; }
+
+@media (orientation: portrait) {
+  .intro { --bar: 4.5rem; }
+  .intro__sub { top: calc(50% + 36vw); } /* clears the stacked ORS / OLO */
+}

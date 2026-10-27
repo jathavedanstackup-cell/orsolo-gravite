@@ -6,7 +6,7 @@ Set-Location $PSScriptRoot
 $blender = "C:\Program Files\Blender Foundation\Blender 5.2\blender.exe"
 $env:ORSOLO_SCALE = "150"
 $env:ORSOLO_SAMPLES = "20"  # OIDN cleans up the rest; the higher pixel count already averages more rays
-$hd = "frames_hd"
+$hd = Join-Path $PSScriptRoot "frames_hd"  # absolute: Blender resolves relative output paths against the drive root
 
 function Encode($src, $dst) {
   foreach ($f in Get-ChildItem "$src\f*.png") {
@@ -30,7 +30,7 @@ function Publish($what) {
 
 function Render($mode, $out, $arg) {
   "$(Get-Date -Format HH:mm) rendering $mode"
-  & $blender -b -P blender\watch.py -- $mode $out $arg 2>&1 | Select-String "Error" | Select-Object -First 5
+  & $blender -b -P blender\watch.py -- $mode $out $arg 2>&1 | Select-String "Saved:|Error" | ForEach-Object { $_.Line.Trim() }
 }
 
 Render intro "$hd\intro" 48;    Encode "$hd\intro" "frames\intro"

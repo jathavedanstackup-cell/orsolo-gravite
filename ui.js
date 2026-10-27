@@ -162,7 +162,6 @@ export function initUi({ lenis, reduced, onDial, onSound, onNight }) {
     },
 
     intro(canvas) {
-      $("#loader").classList.add("is-done");
       if (reduced) return;
       const heroWords = split($(".hero__title"));
       const tl = gsap.timeline({ defaults: { ease: "expo.out" } });
