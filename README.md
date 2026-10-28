@@ -26,13 +26,18 @@ Vanilla JavaScript modules, no build step: Three.js r160, GSAP ScrollTrigger, Le
 
 ## Run locally
 
-Serve the folder with any static server, for example:
+It is a static site with no build step, but it needs a server (ES modules don't load from `file://`). Use one that serves requests in parallel, since the page streams a few hundred frames:
 
 ```bash
-python -m http.server 5173
+npx serve .
 ```
 
-Then open http://localhost:5173.
+Then open the address it prints. In VS Code, the Live Server extension works too. Python's built-in `http.server` handles one request at a time and stalls on the frame sequences.
+
+| Script | What it does |
+| --- | --- |
+| `build-dist.ps1` | Copies only what the site serves into `orsolo-gravite/` for deployment |
+| `render-hd.ps1` | Re-renders every sequence at 1920x1200 in Blender (CPU, several hours) |
 
 ---
 
