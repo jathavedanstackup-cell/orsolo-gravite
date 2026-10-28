@@ -23,7 +23,7 @@ const LOAD_TIMEOUT_MS = 9000;
 // The watch case in the hero pose (last intro frame): centre and half-extents, in 0..1 of the frame.
 // Measured from the outer bezel, crown excluded. The title sequence lands its O exactly here.
 const HERO_CASE = { centre: [0.648, 0.492], half: [0.1745, 0.2917] };
-export const FRAME_VERSION = "hd10271220"; // frames are cached for a year; bump this whenever they are re-rendered
+export const FRAME_VERSION = "hd10281604"; // frames are cached for a year; bump this whenever they are re-rendered
 
 export function createFrames({ reduced, onProgress }) {
   const canvas = document.getElementById("frames");
